@@ -8,7 +8,3 @@ handle["/history"] = requestHandlers.history;
 handle["/status"] = requestHandlers.status;
 
 server.start(router.route, handle);
-
-setInterval(function(){
-	captureStatus.getLCLSStatus();
-},10*1000);

@@ -236,7 +236,7 @@ function spawnNewMonitor(PV, callback){
 
 function history(response, query) {
 	var PVtoGet = query["PV"];
-	console.log("Getting history for PV: " + PVtoGet);
+	//console.log("Getting history for PV: " + PVtoGet);
 	//Default end time to now, start time to 24 hours ago.
 	var end_sec = Number(new Date())/1000;
 	var start_sec = end_sec - (60*60*24);

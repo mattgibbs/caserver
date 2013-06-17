@@ -27,5 +27,11 @@ EPICS needs to be installed from source.  The version you want to install depend
 
 (INSERT INSTALLING EPICS CONTENT HERE)
 
-### NGINX
-NGINX is available in most package managers
+### Nginx
+Nginx is available in most package managers, or you can compile it from source.  The documentation for installing it is available on their wiki, and it is pretty good: [http://wiki.nginx.org/Install](http://wiki.nginx.org/Install).  I compiled it from source, because on lcls-prod03 I can't get to the EPEL package repository.  Like with node, I couldn't write to /usr/local/bin, so I did './configure --prefix=/opt/nginx' to install it to that directory.  Once you have installed it, you need to configure it using the /conf/nginx.conf file.  The config file we use will configure nginx to host all requests, except specifically those which need to be passed to the node.js server.
+
+You'll want to make a new user that runs the nginx process.  In RHEL 5, run 'sudo /usr/sbin/useradd -M -r --shell /sbin/nologin --home-dir /opt/nginx nginx'.
+
+A helpful script to automate starting and stopping the nginx process is available from the Linode library: [https://library.linode.com/assets/662-init-rpm.sh](https://library.linode.com/assets/662-init-rpm.sh).  Rename it to something that makes sense (like init-nginx.sh), then copy it to '/etc/rc.d/init.d/nginx'.  Now you can start the server using this command: 'sudo /etc/rc.d/init.d/nginx start'.  Other commands exist too, like 'stop' and 'restart'.
+
+

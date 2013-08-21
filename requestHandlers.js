@@ -293,7 +293,7 @@ function history(response, query) {
 	});
 	
 	req.on('error', function(err) {
-		console.log('Problem with request: ' + e.message);
+		console.log('Problem with request: ' + err.message);
 	});
 	
 	req.write(xmlrpc);

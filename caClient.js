@@ -105,7 +105,7 @@ function openWebsocketConnection(PV, socket) {
 		        console.log("Error while spawning new camonitor in response to socket request.");
 		        return;
 		    }
-		    
+    		socket.emit(PV,data);
 		    monitors[PV].addSocketConnection();
 		    monitors[PV].on('cached',function(data) {
 		        socket.emit(data.PV,data);

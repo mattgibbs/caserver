@@ -44,8 +44,8 @@ function socketConnection(socket) {
 	socket.setMaxListeners(500);
 	
 	//Message from client to connect to a PV.
-	socket.on('connectToPV',function (connectData) {
-	    caClient.openWebsocketConnection(connectData.pv,socket);
+	socket.on('connectToPV',function (requestedPV) {
+	    caClient.openWebsocketConnection(requestedPV,socket);
 	});
 }
 

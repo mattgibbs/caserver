@@ -143,4 +143,5 @@ process.on('exit',function() {
 });
 
 exports.get = get;
+exports.openWebsocketConnection = openWebsocketConnection;
 exports.status = status;

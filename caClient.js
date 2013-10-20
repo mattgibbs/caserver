@@ -122,10 +122,10 @@ function openWebsocketConnection(PV, socket) {
 	        socket.emit(data.PV,data);
 	    });
 	    socket.on('disconnect',function(){
-	        monitors[PV].removeSocketConnection();
+	        existingMonitor.removeSocketConnection();
 	    });
 		if (existingMonitor.dataCache !== undefined) {
-			socket.emit(existingMonitor.dataCache.PV,existingMonitor.dataCache);
+			socket.emit(PV,existingMonitor.dataCache);
 		}
 	}
 }

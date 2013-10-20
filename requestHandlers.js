@@ -121,4 +121,4 @@ function history(response, query) {
 exports.PV = PV;
 exports.history = history;
 exports.status = status;
-//exports.socketConnection = socketConnection;
+exports.socketConnection = socketConnection;

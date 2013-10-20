@@ -40,39 +40,15 @@ function status(response, query) {
 }
 
 //New WebSocket connection to the server.
-/*
 function socketConnection(socket) {
-	socket.setMaxListeners(100);
+	socket.setMaxListeners(500);
 	
 	//Message from client to connect to a PV.
 	socket.on('connectToPV',function (connectData) {
-		var PVtoGet = connectData.pv;
-		
-		if(monitors[PVtoGet] === undefined) {
-			spawnNewMonitor(PVtoGet,function(newMonitor){
-				newMonitor.addSocketConnection();
-				newMonitor.on('cached',function(dataCache){
-					socket.emit(dataCache.PV,dataCache);
-				});
-				socket.on('disconnect', function (){
-					console.log("Socket disconnected.  Removing connection to " + newMonitor.PV);
-					newMonitor.removeSocketConnection();
-				});
-			});
-		} else {
-			var camonitor = monitors[PVtoGet];
-			camonitor.addSocketConnection();
-			camonitor.on('cached',function(dataCache){
-				socket.emit(dataCache.PV,dataCache);
-			});
-			socket.on('disconnect', function (){
-				console.log("Socket disconnected.  Removing connection to " + camonitor.PV);
-				camonitor.removeSocketConnection();
-			});
-		}
+	    caClient.openWebsocketConnection(connectData.pv,socket);
 	});
 }
-*/
+
 
 //Get history for a PV from the channel archiver via XML-RPC.
 

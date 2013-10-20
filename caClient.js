@@ -38,33 +38,7 @@ function get(PV,callback) {
 	} else {
 		if (monitors[PV] === undefined) {
 			//This is a new connection.  Spawn a new camonitor.  Once it gets its first bit of data, respond with that.
-			var newMonitor = camonitor.startConnection(PV,function(err,newMonitor){
-				if (err) {
-					return callback(err);
-				} else {
-					monitors[PV] = newMonitor;
-
-					//Clean up when this connection ends.
-					newMonitor.on('close', function(code){
-						console.log("Connection to " + newMonitor.PV + " ended.");
-						delete monitors[newMonitor.PV];
-					});
-
-					newMonitor.on('error', function(err) {
-						var err = new Error("Error spawning a camonitor.  This may be happening because the CA environment isn't set up right.");
-						callback(err);
-					});
-
-					newMonitor.once('cached',function(data) {
-						if(data !== undefined) {
-							callback(null,data);
-						} else {
-							var err = new Error("There is no PV data available.")
-							callback(err);
-						}
-					});
-				}
-			});
+			spawnNewMonitor(PV,callback);
 		} else {
 			//This is an existing connection.  Respond with the latest cached data.
 			var existingMonitor = monitors[PV];
@@ -91,6 +65,69 @@ function status() {
 	}
 
 	return monitorList;
+}
+
+function spawnNewMonitor(PV,callback) {
+    var newMonitor = camonitor.startConnection(PV,function(err,newMonitor){
+		if (err) {
+			return callback(err);
+		} else {
+			monitors[PV] = newMonitor;
+
+			//Clean up when this connection ends.
+			newMonitor.on('close', function(code){
+				console.log("Connection to " + newMonitor.PV + " ended.");
+				delete monitors[newMonitor.PV];
+			});
+
+			newMonitor.on('error', function(err) {
+				var err = new Error("Error spawning a camonitor.  This may be happening because the CA environment isn't set up right.");
+				callback(err);
+			});
+
+			newMonitor.once('cached',function(data) {
+				if(data !== undefined) {
+					callback(null,data);
+				} else {
+					var err = new Error("There is no PV data available.")
+					callback(err);
+				}
+			});
+		}
+	});
+}
+
+function openWebsocketConnection(PV, socket) {
+    if (monitors[PV] === undefined) {
+		//This is a new connection.  Spawn a new camonitor.  Once it gets its first bit of data, respond with that.
+		spawnNewMonitor(PV,function(err, data) {
+		    if (err) {
+		        console.log("Error while spawning new camonitor in response to socket request.");
+		        return;
+		    }
+		    
+		    monitors[PV].addSocketConnection();
+		    monitors[PV].on('cached',function(data) {
+		        socket.emit(data.PV,data);
+		    });
+		    socket.on('disconnect',function(){
+		        monitors[PV].removeSocketConnection();
+		    });
+		});
+	} else {
+		//This is an existing monitor, no need to spawn a new one.
+		var existingMonitor = monitors[PV];
+		existingMonitor.addSocketConnection();
+		existingMonitor.on('cached',function(data) {
+	        socket.emit(data.PV,data);
+	    });
+	    socket.on('disconnect',function(){
+	        monitors[PV].removeSocketConnection();
+	    });
+		if (existingMonitor.dataCache !== undefined) {
+			socket.emit(existingMonitor.dataCache.PV,existingMonitor.dataCache);
+		}
+	}
 }
 
 process.on('exit',function() {

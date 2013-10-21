@@ -12,7 +12,10 @@ caClient.get() is how you get data from a PV.  Pass a PV, and a callback to exec
 If there is no established connection to the PV, it will create a new one and add it to 'monitors'.
 If there already is one, it immediately sends the most recently cached value for the PV.
 If you pass an array, it gets all the values and returns an array of the values.
+
+callback has the form callback(err, result, monitor), where err is an error, result is the data, and monitor is the camonitor object for the PV.  Currently, monitor is not used if the request was an array of PVs.
 */
+
 function get(PV,callback) {
 	//If 'PV' is an array, assume each element is a string, and each string is a PV.  Call this function for each individual PV.
 	if( Object.prototype.toString.call( PV ) === '[object Array]' ) {
@@ -44,7 +47,7 @@ function get(PV,callback) {
 			var existingMonitor = monitors[PV];
 			existingMonitor.resetKillTimer();
 			if (existingMonitor.dataCache !== undefined) {
-				return callback(null,existingMonitor.dataCache);
+				return callback(null,existingMonitor.dataCache, existingMonitor);
 			} else {
 				var err = new Error("There is no cached PV data available.");
 				return callback(err);
@@ -68,7 +71,7 @@ function status() {
 }
 
 function spawnNewMonitor(PV,callback) {
-    var newMonitor = camonitor.startConnection(PV,function(err,newMonitor){
+    camonitor.startConnection(PV,function(err,newMonitor){
 		if (err) {
 			return callback(err);
 		} else {
@@ -87,7 +90,7 @@ function spawnNewMonitor(PV,callback) {
 
 			newMonitor.once('cached',function(data) {
 				if(data !== undefined) {
-					callback(null,data);
+					callback(null,data,newMonitor);
 				} else {
 					var err = new Error("There is no PV data available.")
 					callback(err);

@@ -143,6 +143,8 @@ function startKlystronCUDSession(socket, caClient) {
             return;
         }
         
+        monitor.addSocketConnection();
+        
         //This is the initial piece of data we get when the connection opens.
         calcKlystronState(socket, klys, status_word, result);
         

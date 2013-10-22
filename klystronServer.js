@@ -132,10 +132,12 @@ function startKlystronCUDSession(socket, caClient) {
                 var status_word = STATUS_WORDS[stat_word_index];
                 var status_pv = klys["PV"] + ":" + status_word;
                 
-                pv_queue.push(status_pv);
+                pv_queue.push({"PV": status_pv, "klys": klys});
             }
         }
     }
+    
+    var klystron;
     
     function pv_callback(err, result, monitor) {
         if (err) {
@@ -146,22 +148,25 @@ function startKlystronCUDSession(socket, caClient) {
         monitor.addSocketConnection();
         
         //This is the initial piece of data we get when the connection opens.
-        calcKlystronState(socket, klys, status_word, result);
+        calcKlystronState(socket, klystron, status_word, result);
         
         //This callback happens on all following PV changes.
         monitor.on('cached', function(data) {
-            calcKlystronState(socket, klys, status_word, data);
+            calcKlystronState(socket, klystron, status_word, data);
         });
         
-        var nextPV = pv_queue.shift();
-        if (nextPV) {
-            caClient.get(nextPV, pv_callback);
+        var next = pv_queue.shift();
+        if (next) {
+            klystron = next["klys"];
+            caClient.get(next["PV"], pv_callback);
         } else {
             console.log("Klystron Server done connecting to PVs.");
         }
     }
     
-    caClient.get(pv_queue.shift(),pv_callback);
+    var next = pv_queue.shift();
+    klystron = next["klys"];
+    caClient.get(next["PV"],pv_callback);
     
     socket.on('disconnect',function(){
         var delete_queue = [];

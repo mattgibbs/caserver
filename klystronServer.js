@@ -133,10 +133,6 @@ function startKlystronCUDSession(socket, caClient) {
                 var status_pv = klys["PV"] + ":" + status_word;
                 
                 pv_queue.push(status_pv);
-                
-                /*
-                
-                */
             }
         }
     }
@@ -157,11 +153,11 @@ function startKlystronCUDSession(socket, caClient) {
         
         var nextPV = pv_queue.shift();
         if (nextPV) {
-            caClient.get(nextPV, pv_callback(err, result, monitor));
+            caClient.get(nextPV, pv_callback);
         }
     }
     
-    caClient.get(pv_queue.shift(),pv_callback(err, result, monitor));
+    caClient.get(pv_queue.shift(),pv_callback);
     
     socket.on('disconnect',function(){
         for (var sector in klystrons) {

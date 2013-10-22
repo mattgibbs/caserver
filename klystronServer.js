@@ -93,7 +93,7 @@ var HDSC_CHECK_PHASE = 0x00000040;
 
 
 //Generate the list of LCLS klystrons.
-var LI20 = {0: "1",                                     5: "51", 6: "61", 7: "71", 8: "81"};
+var LI20 = {                                            5: "51", 6: "61", 7: "71", 8: "81"};
 var LI21 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
 var LI22 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
 var LI23 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
@@ -104,9 +104,9 @@ var LI27 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71
 var LI28 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
 var LI29 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
 var LI30 = {0: "1", 1: "11", 2: "21", 3: "31", 4: "41", 5: "51", 6: "61", 7: "71", 8: "81"};
-var klystrons = {20: LI20, 21: LI21, 22: LI22, 23: LI23, 24: LI24, 25: LI25, 26: LI26, 27: LI27, 28: LI28, 29: LI29, 30: LI30};
-
-for (var sector in klystrons) {
+var sectors = {20: LI20, 21: LI21, 22: LI22, 23: LI23, 24: LI24, 25: LI25, 26: LI26, 27: LI27, 28: LI28, 29: LI29, 30: LI30};
+var klystrons = {};
+for (var sector in sectors) {
     for (var station in sector) {
         var PV;
         if (station == 0) {
@@ -189,15 +189,8 @@ function calcKlystronState(socket, klys, status_word, new_value) {
             klys.state = "On Beam";
         }
         
-        if (klys.state != old_state) {
-            var message = "";
-            if (klys["station"] == 0) {
-                message = "sbst" + klys["sector"];
-            } else {
-                message = "klys" + klys["sector"] + "-" + klys["station"];
-            }
-            
-            socket.emit(message,klys);
+        if (klys.state != old_state) {            
+            socket.emit("update",klys);
         }
     }
 }

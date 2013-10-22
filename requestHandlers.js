@@ -2,6 +2,7 @@ var spawn = require("child_process").spawn;
 var fork = require("child_process").fork;
 var http = require("http");
 var caClient = require("./caClient");
+var klystronServer = require("./klystronServer");
 var monitors = {};
 
 //HTTP GET request for a PV.
@@ -16,7 +17,7 @@ function PV(response, query) {
 	
 	//We will run this if there is some kind of a problem getting the PV data.
 	function respondWithFailure() {
-		response.writeHead(404,{"Content-Type": "text/plain","Access-Control-Allow-Origin": "*"});
+		response.writeHead(404, {"Content-Type": "text/plain","Access-Control-Allow-Origin": "*"});
 		response.write("Could not connect to PV.");
 		console.log("Cached data not availabe for " + PVtoGet);
 		response.end();
@@ -44,8 +45,12 @@ function socketConnection(socket) {
 	socket.setMaxListeners(500);
 	
 	//Message from client to connect to a PV.
-	socket.on('connectToPV',function (requestedPV) {
+	socket.on('connectToPV',function(requestedPV) {
 	    caClient.openWebsocketConnection(requestedPV,socket);
+	});
+	
+	socket.on('startKlysCudSession', function() {
+	    klystronServer.startKlystronCUDSession(socket, caClient);
 	});
 }
 

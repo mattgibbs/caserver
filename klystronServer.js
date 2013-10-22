@@ -122,7 +122,7 @@ for (var sector in klystrons) {
 
 function startKlystronCUDSession(socket, caClient) {
     for (var sector in klystrons) {
-        for (var station in sector) {
+        for (var station in klystrons[sector]) {
             var klys = klystrons[sector][station];
             for (var stat_word_index in STATUS_WORDS) {
                 var status_word = STATUS_WORDS[stat_word_index];

@@ -39,22 +39,20 @@ function get(PV,callback) {
 			});
 		}
 	} else {
-	    process.nextTick(function() {
-	        if (monitors[PV] === undefined) {
-    			//This is a new connection.  Spawn a new camonitor.  Once it gets its first bit of data, respond with that.
-    			spawnNewMonitor(PV,callback);
-    		} else {
-    			//This is an existing connection.  Respond with the latest cached data.
-    			var existingMonitor = monitors[PV];
-    			existingMonitor.resetKillTimer();
-    			if (existingMonitor.dataCache !== undefined) {
-    				return callback(null,existingMonitor.dataCache, existingMonitor);
-    			} else {
-    				var err = new Error("There is no cached PV data available.");
-    				return callback(err);
-    			}
-    		}
-	    });
+        if (monitors[PV] === undefined) {
+			//This is a new connection.  Spawn a new camonitor.  Once it gets its first bit of data, respond with that.
+			spawnNewMonitor(PV,callback);
+		} else {
+			//This is an existing connection.  Respond with the latest cached data.
+			var existingMonitor = monitors[PV];
+			existingMonitor.resetKillTimer();
+			if (existingMonitor.dataCache !== undefined) {
+				return callback(null,existingMonitor.dataCache, existingMonitor);
+			} else {
+				var err = new Error("There is no cached PV data available.");
+				return callback(err);
+			}
+		}
 	}
 }
 

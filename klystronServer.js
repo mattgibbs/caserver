@@ -121,30 +121,47 @@ for (var sector in klystrons) {
 }
 
 function startKlystronCUDSession(socket, caClient) {
+    console.log("Starting Klystron CUD Session.");
+    
+    var pv_queue = [];
+    
     for (var sector in klystrons) {
         for (var station in klystrons[sector]) {
             var klys = klystrons[sector][station];
             for (var stat_word_index in STATUS_WORDS) {
                 var status_word = STATUS_WORDS[stat_word_index];
                 var status_pv = klys["PV"] + ":" + status_word;
-                caClient.get(status_pv,function(err, result, monitor) {
-                    if (err) {
-                        console.log("Error while connecting to klystron CUD PV: status_pv");
-                        return;
-                    }
-                    
-                    //This is the initial piece of data we get when the connection opens.
-                    calcKlystronState(socket, klys, status_word, result);
-                    
-                    //This callback happens on all following PV changes.
-                    monitor.on('cached', function(data) {
-                        calcKlystronState(socket, klys, status_word, data);
-                    });
-                    
-                });
+                
+                pv_queue.push(status_pv);
+                
+                /*
+                
+                */
             }
         }
     }
+    
+    function pv_callback(err, result, monitor) {
+        if (err) {
+            console.log("Error while connecting to klystron CUD PV: status_pv");
+            return;
+        }
+        
+        //This is the initial piece of data we get when the connection opens.
+        calcKlystronState(socket, klys, status_word, result);
+        
+        //This callback happens on all following PV changes.
+        monitor.on('cached', function(data) {
+            calcKlystronState(socket, klys, status_word, data);
+        });
+        
+        var nextPV = pv_queue.shift();
+        if (nextPV) {
+            caClient.get(nextPV, pv_callback(err, result, monitor));
+        }
+    }
+    
+    caClient.get(pv_queue.shift(),pv_callback(err, result, monitor));
     
     socket.on('disconnect',function(){
         for (var sector in klystrons) {

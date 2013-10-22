@@ -162,18 +162,26 @@ function startKlystronCUDSession(socket, caClient) {
     caClient.get(pv_queue.shift(),pv_callback);
     
     socket.on('disconnect',function(){
+        var delete_queue = [];
         for (var sector in klystrons) {
             for (var station in sector) {
                 var klys = klystrons[sector][station];
                 for (var stat_word_index in STATUS_WORDS) {
                     var status_word = STATUS_WORDS[stat_word_index];
                     var status_pv = klys["PV"] + ":" + status_word;
-                    caClient.get(status_pv,function(err, result, monitor) {
-                        monitor.removeSocketConnection();
-                    });
+                    delete_queue.push(status_pv);
                 }
             }
         }
+        
+        function deletion_callback(err, result, monitor){
+            monitor.removeSocketConnection();
+            
+            var next_pv_to_delete = delete_queue.shift();
+            caClient.get(next_pv_to_delete,deletion_callback);
+        }
+        
+        caClient.get(delete_queue.shift(),deletion_callback);
     });
 }
 

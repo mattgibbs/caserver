@@ -156,6 +156,8 @@ function startKlystronCUDSession(socket, caClient) {
         var nextPV = pv_queue.shift();
         if (nextPV) {
             caClient.get(nextPV, pv_callback);
+        } else {
+            console.log("Klystron Server done connecting to PVs.");
         }
     }
     
@@ -178,7 +180,12 @@ function startKlystronCUDSession(socket, caClient) {
             monitor.removeSocketConnection();
             
             var next_pv_to_delete = delete_queue.shift();
-            caClient.get(next_pv_to_delete,deletion_callback);
+            if (next_pv_to_delete) {
+                caClient.get(next_pv_to_delete,deletion_callback);
+            } else {
+                console.log("Klystron Server done sending disconnect messages.")
+            }
+            
         }
         
         caClient.get(delete_queue.shift(),deletion_callback);

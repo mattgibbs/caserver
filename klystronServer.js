@@ -166,7 +166,7 @@ function startKlystronCUDSession(socket, caClient) {
     socket.on('disconnect',function(){
         var delete_queue = [];
         for (var sector in klystrons) {
-            for (var station in sector) {
+            for (var station in klystrons[sector]) {
                 var klys = klystrons[sector][station];
                 for (var stat_word_index in STATUS_WORDS) {
                     var status_word = STATUS_WORDS[stat_word_index];
@@ -195,7 +195,7 @@ function startKlystronCUDSession(socket, caClient) {
 /* calcKlystronState updates a klystron's state when one of its words updates, then emits a websocket message if the state changes. */
 function calcKlystronState(socket, klys, status_word, new_value) {
     klys[status_word] = new_value;
-    
+    console.log("Calcualting new state for " + klys["sector"] + "-" + klys["station"]);
     var readyForStateCalc = true;
     for (var stat_word_index in STATUS_WORDS) {
         if (klys[status_word] === null) {

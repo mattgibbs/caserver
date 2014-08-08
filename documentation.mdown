@@ -15,7 +15,7 @@ Node.js is not available in the RHEL 5 package repository (although it is in the
 To compile node.js, you'll need a somewhat-recent version of python (2.6 or above).  This should be pretty straightforward to get via your package manager.  
 
 First, we need to download the latest source tarball, which is availble at [http://nodejs.org/dist/node-latest.tar.gz](http://nodejs.org/dist/node-latest.tar.gz).  Once you've got it, unzip it, configure it, and make it:   
-	tar -xzvf node-latest.tar.gz && cd node-*   
+	tar xzvf node-latest.tar.gz && cd node-*   
 	./configure && make -j 3 && sudo make install
 
 NOTE: on lcls-prod03, I could not write to /usr/local/bin, so I had to do './configure --prefix=/opt/node' instead.
@@ -23,15 +23,27 @@ NOTE: on lcls-prod03, I could not write to /usr/local/bin, so I had to do './con
 Should be that easy!
 
 ### EPICS
-EPICS needs to be installed from source.  The version you want to install depends more on the accelerator than on the web accelerator data server - choose the version that you think will work with the accelerator.  The EPICS base releases are available here: [http://www.aps.anl.gov/epics/download/base/index.php](http://www.aps.anl.gov/epics/download/base/index.php).  Setting up EPICS is not simple, and quite a bit of it depends on your particular environment.  The information below is how it is done at SLAC, for LCLS and FACET.  
+EPICS needs to be installed from source.  The version you want to install depends more on the accelerator than on the web accelerator data server - choose the version that you think will work with the accelerator.  The EPICS base releases are available here: [http://www.aps.anl.gov/epics/download/base/index.php](http://www.aps.anl.gov/epics/download/base/index.php).  Setting up EPICS is not simple, and quite a bit of it depends on your particular environment.
 
-(INSERT INSTALLING EPICS CONTENT HERE)
+Luckily, at SLAC EPICS is already installed in a director in AFS space, so we don't have to actually install it ourselves.  Make sure you run the EPICS Environment setup script in your .bashrc file and you should be good to go:
+  if [ -f /afs/slac/g/lcls/tools/script/ENVS.bash ]; then
+      . /afs/slac/g/lcls/tools/script/ENVS.bash
+  fi
+  
+Make sure you are in the bash shell before you run the server - if you aren't, the environment won't be set up right, and no channel access stuff will work.
 
 ### Nginx
 Nginx is available in most package managers, or you can compile it from source.  The documentation for installing it is available on their wiki, and it is pretty good: [http://wiki.nginx.org/Install](http://wiki.nginx.org/Install).  I compiled it from source, because on lcls-prod03 I can't get to the EPEL package repository.  Like with node, I couldn't write to /usr/local/bin, so I did './configure --prefix=/opt/nginx' to install it to that directory.  Once you have installed it, you need to configure it using the /conf/nginx.conf file.  The config file we use will configure nginx to host all requests, except specifically those which need to be passed to the node.js server.
 
-You'll want to make a new user that runs the nginx process.  In RHEL 5, run 'sudo /usr/sbin/useradd -M -r --shell /sbin/nologin --home-dir /opt/nginx nginx'.
+You'll want to make a new user that runs the nginx process.  In RHEL 5 or 6, run this:
+  'sudo /usr/sbin/useradd -M --shell /sbin/nologin --home-dir /opt/nginx nginx'
 
 A helpful script to automate starting and stopping the nginx process is available from the Linode library: [https://library.linode.com/assets/662-init-rpm.sh](https://library.linode.com/assets/662-init-rpm.sh).  Rename it to something that makes sense (like init-nginx.sh), then copy it to '/etc/rc.d/init.d/nginx'.  Now you can start the server using this command: 'sudo /etc/rc.d/init.d/nginx start'.  Other commands exist too, like 'stop' and 'restart'.
 
+### caserver
+This is the node.js application that responds to user HTTP requests with channel access data.  It depends on the socket.io library, which adds support for websockets.  Unfortunately, it is a little annyoing to install socket.io on servers without internet access, like lcls-prod03.  Your best bet is to install node.js on a computer that does have internet access, then run 'npm install socket.io' to install it locally.  It will make a folder called 'node_modules' with a 'socket.io' subdirectory.  Compress the socket.io directory:
+  tar cvzf socket.io.tar.gz socket.io
+and then copy it into the node_modules directory in the caserver directory on the server.  Unpack it:
+  tar xvzf socket.io.tar.gz
+Then go back into the caserver directory and run 'npm rebuild' to reinstall the module using the local data.
 

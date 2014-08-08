@@ -1,9 +1,11 @@
+/*
+router.js - The router takes a list of request handlers, and the pathname and query object from a client request.
+'response' is our still-incomplete response to the user's request.  It will be completed and sent to the user later.
+*/
 function route(handle, pathname, query, response) {
-	//console.log("About to route a request for " + pathname);
-	if (typeof handle[pathname] === 'function') {
+	if (typeof handle[pathname] === 'function') { //The handle object comes from index.js
 		handle[pathname](response, query);
 	} else {
-		//console.log("No request handler found for " + pathname);
 		response.writeHead(404,{"Content-Type": "text/plain","Access-Control-Allow-Origin": "*"});
 		response.write("404 Not found");
 		response.end();

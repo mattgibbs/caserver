@@ -1,3 +1,9 @@
+/* 
+requestHandlers.js - This is where most of the action happens.
+The router runs one of the functions in this file.  The called function does some stuff,
+writes some data into the response object, and sends it to the client.
+*/
+
 var spawn = require("child_process").spawn;
 var fork = require("child_process").fork;
 var http = require("http");
@@ -5,7 +11,7 @@ var caClient = require("./caClient");
 var klystronServer = require("./klystronServer");
 var monitors = {};
 
-//HTTP GET request for a PV.
+//HTTP GET request for a PV.  Sends PV data to the user.
 function PV(response, query) {
 	var PVtoGet = query["PV"];
 	//We will run this if we successfully get some PV data back.
@@ -33,6 +39,7 @@ function PV(response, query) {
 	});	
 }
 
+//The sends the status of the channel access connections to the user.
 function status(response, query) {
 	var data = caClient.status();
 	response.writeHead(200, {"Content-Type": "application/json", "Access-Control-Allow-Origin": "*"});
@@ -48,18 +55,13 @@ function socketConnection(socket) {
 	socket.on('connectToPV',function(requestedPV) {
 	    caClient.openWebsocketConnection(requestedPV,socket);
 	});
-	
-	socket.on('startKlysCudSession', function() {
-	    klystronServer.startKlystronCUDSession(socket, caClient);
-	});
 }
 
-
 //Get history for a PV from the channel archiver via XML-RPC.
+//This is the old archiver, not the archive appliance.  This desperately needs to be upgraded.
 
 function history(response, query) {
 	var PVtoGet = query["PV"];
-	//console.log("Getting history for PV: " + PVtoGet);
 	//Default end time to now, start time to 24 hours ago.
 	var end_sec = Number(new Date())/1000;
 	var start_sec = end_sec - (60*60*24);

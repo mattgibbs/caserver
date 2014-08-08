@@ -1,3 +1,9 @@
+/*
+camonitor.js - This file holds all the code that knows how to spawn a new camonitor process, read data from it,
+and parse the data.
+
+*/
+
 var spawn = require("child_process").spawn;
 
 //start spawns a new camonitor process.

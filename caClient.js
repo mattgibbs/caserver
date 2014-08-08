@@ -1,7 +1,9 @@
 /*
 caClient is a node.js interface to Channel Access.  You ask it for data from a PV, and it returns that data.
-It intelligently manages many camonitor processes so that only one connection to a PV is open at a time, no matter how many requests are made.  Inactive connections are closed after 30 seconds without use.
-It caches the latest value from a PV asynchronously, as it gets it from its camonitors, so that data can be returned as quickly as possible.
+It intelligently manages many camonitor processes so that only one connection to a PV is open at a time, 
+no matter how many requests are made.  Inactive connections are closed after 30 seconds without use.
+It caches the latest value from a PV asynchronously, as it gets it from its camonitors, so that data 
+can be returned as quickly as possible.
 */
 var camonitor = require("./camonitor");
 

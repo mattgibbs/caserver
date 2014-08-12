@@ -40,10 +40,15 @@ You'll want to make a new user that runs the nginx process.  In RHEL 5 or 6, run
 
 A helpful script to automate starting and stopping the nginx process is available from the Linode library: [https://library.linode.com/assets/662-init-rpm.sh](https://library.linode.com/assets/662-init-rpm.sh).  Rename it to something that makes sense (like init-nginx.sh), then copy it to '/etc/rc.d/init.d/nginx'.  Now you can start the server using this command: 'sudo /etc/rc.d/init.d/nginx start'.  Other commands exist too, like 'stop' and 'restart'.
 
+Once nginx is ready to run, you have to configure it.  We want to send all PV data requests to the node server, have every request for anything in the /webcud/ subdirectory go to the NFS /webcud/ directory, and have everything else served from /opt/nginx/html/.  I've saved a copy of the nginx config file to do this in my AFS space as 'nginx.conf'.
+
 ### caserver
 This is the node.js application that responds to user HTTP requests with channel access data.  It depends on the socket.io library, which adds support for websockets.  Unfortunately, it is a little annyoing to install socket.io on servers without internet access, like lcls-prod03.  Your best bet is to install node.js on a computer that does have internet access, then run 'npm install socket.io' to install it locally.  It will make a folder called 'node_modules' with a 'socket.io' subdirectory.  Compress the socket.io directory:
   tar cvzf socket.io.tar.gz socket.io
 and then copy it into the node_modules directory in the caserver directory on the server.  Unpack it:
   tar xvzf socket.io.tar.gz
 Then go back into the caserver directory and run 'npm rebuild' to reinstall the module using the local data.
-
+On RHEL 6, we can make an upstart script to automatically start and stop the node process whenever the server restarts, and also make it easier to stop and start the node process on-demand.  I've saved one of these in my AFS space as 'nodejs.conf'.  You can use the command
+  'sudo /sbin/start nodejs' to start the server and
+  'sudo /sbin/stop nodejs' to stop the server.  This script should also automatically start node when the server starts, although I haven't seen it happen yet.
+  
